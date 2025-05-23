@@ -20,13 +20,24 @@ pipeline {
                     credentialsId: 'MyAWS',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]){
-                        sh(script: 'aws s3 cp /var/lib/jenkins/workspace/JenkinsPipeline/index.html s3://prod-env-jenkins-poe/')
+                        sh(script: 'aws s3 cp /var/lib/jenkins/workspace/JenkinsPipeline/index.html s3://test-jenkins-poe-dev/')
                 }
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing'
+                script {
+                    def url = 'ObjectURL'
+                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' '$url'", returnStdout: true)
+
+                    if (response == '200') {
+                        echo 'Test OK'
+                    } else {
+                        echo response
+                        error 'Test NG'
+                    }
+                }
             }
         }
         stage('Release') {
